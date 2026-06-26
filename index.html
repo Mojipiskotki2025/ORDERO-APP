@@ -10,7 +10,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
         body { background: #f0f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
         
-        /* === MODERN PHONE === */
         .phone {
             width: 390px; max-width: 100%; background: #ffffff; border-radius: 44px;
             box-shadow: 0 30px 80px rgba(0,0,0,0.15), 0 10px 30px rgba(0,0,0,0.05);
@@ -58,14 +57,11 @@
         .search-bar input::placeholder { color: rgba(255,255,255,0.6); }
         .search-bar i { color: rgba(255,255,255,0.6); }
 
-        /* === VIEWS === */
         .view { display: none; flex-direction: column; height: 100%; background: transparent; }
         .view.active { display: flex; }
-
-        /* === SCROLL CONTENT === */
         .scroll-content { flex: 1; overflow-y: auto; padding: 0 16px 100px; }
 
-        /* === CATEGORY STRIP (Modern) === */
+        /* === CATEGORY STRIP (Modern, Scrolling) === */
         .category-strip {
             display: flex;
             gap: 10px;
@@ -91,6 +87,7 @@
             background: rgba(255,255,255,0.5);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255,255,255,0.3);
+            flex-shrink: 0;
         }
         .cat-item.active {
             opacity: 1;
@@ -112,7 +109,7 @@
             transition: 0.3s;
         }
         .cat-item.active .icon-circle { background: rgba(255,255,255,0.2); color: white; }
-        .cat-item span { font-size: 10px; font-weight: 600; color: #2d3436; margin-top: 4px; transition: 0.3s; }
+        .cat-item span { font-size: 10px; font-weight: 600; color: #2d3436; margin-top: 4px; transition: 0.3s; white-space: nowrap; }
 
         /* === RESTAURANT CARD (Premium) === */
         .restaurant-card {
@@ -150,13 +147,15 @@
             font-size: 18px;
             font-weight: 800;
             color: white;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
         .restaurant-card .card-img .overlay .meta {
             font-size: 12px;
-            color: rgba(255,255,255,0.8);
+            color: rgba(255,255,255,0.9);
             display: flex;
             gap: 12px;
             margin-top: 4px;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.3);
         }
         .restaurant-card .card-img .badge-top {
             position: absolute;
@@ -181,7 +180,7 @@
         .restaurant-card .card-footer .info i { margin-right: 4px; }
         .restaurant-card .card-footer .price-tag { font-weight: 700; color: #00b894; font-size: 14px; }
 
-        /* === BOTTOM SHEET (Premium) === */
+        /* === BOTTOM SHEET (Premium Menu) === */
         .bottom-sheet {
             position: absolute;
             bottom: -100%;
@@ -213,7 +212,8 @@
             padding: 14px 0;
             border-bottom: 1px solid #f0f0f0;
         }
-        .menu-item .left { flex: 1; }
+        .menu-item .left { flex: 1; display: flex; align-items: center; gap: 12px; }
+        .menu-item .left .memoji { font-size: 20px; }
         .menu-item .left .mname { font-weight: 600; font-size: 15px; }
         .menu-item .left .mdesc { font-size: 12px; color: #b2bec3; }
         .menu-item .right { display: flex; align-items: center; gap: 12px; }
@@ -269,7 +269,7 @@
         }
         .cart-bubble .total { color: #fdcb6e; font-weight: 700; }
 
-        /* === CHECKOUT OVERLAY === */
+        /* === CHECKOUT === */
         .checkout-overlay {
             position: absolute;
             top: 0;
@@ -328,7 +328,6 @@
             right: 0;
             background: rgba(255,255,255,0.92);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid rgba(0,0,0,0.05);
             display: flex;
             justify-content: space-around;
@@ -340,12 +339,9 @@
         .bottom-nav .nav-item.active { color: #00b894; }
         .bottom-nav .nav-item.active i { transform: translateY(-2px); }
 
-        /* === HERO GREETING === */
         .hero-greeting { padding: 16px 0 8px; }
         .hero-greeting h1 { font-size: 22px; font-weight: 800; color: #1a1a2e; }
         .hero-greeting p { color: #636e72; font-size: 14px; margin-top: 2px; }
-
-        /* Empty state */
         .empty-state { text-align: center; padding: 60px 20px; color: #b2bec3; }
         .empty-state i { font-size: 48px; display: block; margin-bottom: 16px; }
         .empty-state h3 { font-size: 18px; color: #2d3436; }
@@ -354,10 +350,8 @@
 <body>
 <div class="phone" id="app">
 
-    <!-- ===== STATUS BAR ===== -->
     <div class="status-bar"><span>9:41</span><span><i class="fas fa-signal"></i> <i class="fas fa-wifi"></i></span></div>
 
-    <!-- ===== HEADER ===== -->
     <div class="header">
         <div class="logo-row">
             <div class="logo">ORDERO<span>.</span><span class="logo-badge">BETA</span></div>
@@ -380,16 +374,19 @@
                 <p>Odkrij najboljše restavracije v Ljubljani.</p>
             </div>
 
-            <!-- Categories -->
+            <!-- Categories (Expanded) -->
             <div class="category-strip" id="categoryFilter">
                 <div class="cat-item active" data-cat="all"><div class="icon-circle"><i class="fas fa-utensils"></i></div><span>Vse</span></div>
                 <div class="cat-item" data-cat="pica"><div class="icon-circle"><i class="fas fa-pizza-slice"></i></div><span>Pica</span></div>
                 <div class="cat-item" data-cat="burger"><div class="icon-circle"><i class="fas fa-hamburger"></i></div><span>Burger</span></div>
                 <div class="cat-item" data-cat="sushi"><div class="icon-circle"><i class="fas fa-fish"></i></div><span>Sushi</span></div>
-                <div class="cat-item" data-cat="kavarna"><div class="icon-circle"><i class="fas fa-mug-hot"></i></div><span>Kavarna</span></div>
+                <div class="cat-item" data-cat="azijska"><div class="icon-circle"><i class="fas fa-egg"></i></div><span>Azijska</span></div>
+                <div class="cat-item" data-cat="balkanska"><div class="icon-circle"><i class="fas fa-drumstick-bite"></i></div><span>Balkanska</span></div>
+                <div class="cat-item" data-cat="italijanska"><div class="icon-circle"><i class="fas fa-flag"></i></div><span>Italijanska</span></div>
+                <div class="cat-item" data-cat="mehika"><div class="icon-circle"><i class="fas fa-pepper"></i></div><span>Mehiška</span></div>
+                <div class="cat-item" data-cat="vegan"><div class="icon-circle"><i class="fas fa-leaf"></i></div><span>Vegan</span></div>
             </div>
 
-            <!-- Restaurant List -->
             <div id="restaurantList"></div>
         </div>
     </div>
@@ -403,20 +400,31 @@
                 <div class="form-group"><label>Ime restavracije *</label><input id="rName" required placeholder="Npr. Pizza Napoli" /></div>
                 <div class="form-group"><label>Naslov *</label><input id="rAddress" required placeholder="Trubarjeva 12, Ljubljana" /></div>
                 <div class="form-group"><label>Telefon</label><input id="rPhone" placeholder="041 234 567" /></div>
-                <div class="form-group"><label>Email (za prijavo) *</label><input id="rEmail" type="email" required placeholder="info@pizzanapoli.si" /></div>
-                <div class="form-group"><label>Kategorija</label><select id="rCuisine"><option value="pica">🍕 Pica</option><option value="burger">🍔 Burger</option><option value="sushi">🍣 Sushi</option><option value="kavarna">☕ Kavarna</option><option value="meso">🥩 Meso</option></select></div>
-                <div class="form-group"><label>Kratek opis</label><textarea id="rDesc" rows="2" placeholder="Avtentična italijanska kuhinja..."></textarea></div>
-                <div class="form-group"><label>Meni (jedi z cenami)</label><textarea id="rMenu" rows="3" placeholder="Margherita 8.90€, Capricciosa 10.90€, Coca-Cola 2.50€"></textarea></div>
+                <div class="form-group"><label>Email *</label><input id="rEmail" type="email" required placeholder="info@pizzanapoli.si" /></div>
+                <div class="form-group"><label>Kategorija</label>
+                    <select id="rCuisine">
+                        <option value="pica">🍕 Pica</option>
+                        <option value="burger">🍔 Burger</option>
+                        <option value="sushi">🍣 Sushi</option>
+                        <option value="azijska">🥢 Azijska</option>
+                        <option value="balkanska">🥩 Balkanska</option>
+                        <option value="italijanska">🇮🇹 Italijanska</option>
+                        <option value="mehika">🌮 Mehiška</option>
+                        <option value="vegan">🌱 Vegan</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Kratek opis</label><textarea id="rDesc" rows="2" placeholder="Avtentična kuhinja..."></textarea></div>
+                <div class="form-group"><label>Meni (jedi z cenami)</label><textarea id="rMenu" rows="3" placeholder="Margherita 8.90€, Capricciosa 10.90€"></textarea></div>
                 <div class="form-group"><label>Izberite paket</label>
-                    <div class="package-option" data-price="0" onclick="selectPackage(this, 'Osnovni', 0)"><span><b>Osnovni (Brezplačno)</b><br><span style="font-size:12px;color:#636e72;">Osnovni profil</span></span><span>€0</span></div>
+                    <div class="package-option" data-price="0" onclick="selectPackage(this, 'Osnovni', 0)"><span><b>Osnovni</b><br><span style="font-size:12px;color:#636e72;">Brezplačno</span></span><span>€0</span></div>
                     <div class="package-option" data-price="19.99" onclick="selectPackage(this, 'Plus', 19.99)"><span><b>Plus</b><br><span style="font-size:12px;color:#636e72;">Oznaka PREMIUM</span></span><span>€19.99/m</span></div>
-                    <div class="package-option" data-price="39.99" onclick="selectPackage(this, 'Pro', 39.99)"><span><b>Pro</b><br><span style="font-size:12px;color:#636e72;">Izpostavitev + analitika</span></span><span>€39.99/m</span></div>
+                    <div class="package-option" data-price="39.99" onclick="selectPackage(this, 'Pro', 39.99)"><span><b>Pro</b><br><span style="font-size:12px;color:#636e72;">Izpostavitev</span></span><span>€39.99/m</span></div>
                 </div>
                 <input type="hidden" id="selectedPackageName" value="Osnovni" />
                 <input type="hidden" id="selectedPackagePrice" value="0" />
-                <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Pošlji v pregled</button>
+                <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Pošlji</button>
             </form>
-            <button class="btn-secondary" onclick="switchView('customerView')">Nazaj na iskanje</button>
+            <button class="btn-secondary" onclick="switchView('customerView')">Nazaj</button>
         </div>
     </div>
 
@@ -424,16 +432,16 @@
     <div id="adminView" class="view">
         <div class="scroll-content-adm">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
-                <h2 style="font-size:20px; font-weight:800;">🔐 Admin nadzor</h2>
+                <h2 style="font-size:20px; font-weight:800;">🔐 Admin</h2>
                 <span style="font-size:12px;color:#636e72;cursor:pointer;" onclick="switchView('customerView')"><i class="fas fa-times"></i></span>
             </div>
             <div class="admin-panel"><h4>Čakajo na odobritev</h4><div class="number" id="pendingCount" style="font-size:24px; font-weight:800;">0</div></div>
             <div id="adminList"></div>
-            <button class="btn-secondary" onclick="switchView('customerView')" style="margin-top:16px;">Nazaj na aplikacijo</button>
+            <button class="btn-secondary" onclick="switchView('customerView')" style="margin-top:16px;">Nazaj</button>
         </div>
     </div>
 
-    <!-- ===== CART BUBBLE ===== -->
+    <!-- ===== CART ===== -->
     <div id="cartBubble" class="cart-bubble" onclick="openCheckout()">
         <span>🛒 Košarica</span>
         <span class="count" id="cartCount">0</span>
@@ -477,7 +485,7 @@
     </div>
 </div>
 
-<!-- ===== SUPABASE SDK ===== -->
+<!-- ===== SUPABASE ===== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ============================================================
@@ -517,11 +525,19 @@ async function saveDataToSupabase(data) {
 function saveData() { saveDataToSupabase(restaurants); }
 function renderAll() { renderCustomerView(); renderAdminView(); updatePendingCount(); updateCartBubble(); }
 
+// ============================================================
+// DEFAULT DATA (Expanded Cuisines)
+// ============================================================
 function getDefaultRestaurants() {
     return [
-        { id: 1, name: 'Pizza Napoli', address: 'Trubarjeva 12', phone: '041 234 567', email: 'info@pizzanapoli.si', cuisine: 'pica', description: 'Avtentična italijanska pica, pečena v peči na drva.', menu: 'Margherita 8.90€, Capricciosa 10.90€, Prosciutto 11.90€, Coca-Cola 2.50€', package_name: 'Spotlight', package_price: 149.99, package_type: 'spotlight', icon: '🍕', status: 'approved', created_at: new Date().toISOString() },
-        { id: 2, name: 'Burger House', address: 'Slovenska 5', phone: '040 123 456', email: 'info@burgerhouse.si', cuisine: 'burger', description: 'Sočni burgerji iz svežega govejega mesa.', menu: 'Classic 9.90€, Double 12.90€, Cheese 10.90€, Pomfrit 3.50€', package_name: 'Plus', package_price: 19.99, package_type: 'plus', icon: '🍔', status: 'approved', created_at: new Date().toISOString() },
-        { id: 3, name: 'Sushi Master', address: 'Miklošičeva 8', phone: '031 987 654', email: 'info@sushimaster.si', cuisine: 'sushi', description: 'Svež japonski sushi, pripravljen iz najboljših sestavin.', menu: 'Nigiri 12.90€, Maki 10.90€, Sashimi 14.90€, Miso juha 3.50€', package_name: 'Premium', package_price: 39.99, package_type: 'premium', icon: '🍣', status: 'approved', created_at: new Date().toISOString() }
+        { id: 1, name: 'Pizza Napoli', address: 'Trubarjeva 12, Ljubljana', phone: '041 234 567', email: 'info@pizzanapoli.si', cuisine: 'pica', description: 'Avtentična italijanska pica, pečena v peči na drva.', menu: '🍕 Margherita 8.90€, 🍕 Capricciosa 10.90€, 🍕 Prosciutto 11.90€, 🥤 Coca-Cola 2.50€', package_name: 'Spotlight', package_price: 149.99, package_type: 'spotlight', icon: '🍕', status: 'approved', created_at: new Date().toISOString() },
+        { id: 2, name: 'Burger House', address: 'Slovenska 5, Ljubljana', phone: '040 123 456', email: 'info@burgerhouse.si', cuisine: 'burger', description: 'Sočni burgerji iz svežega govejega mesa.', menu: '🍔 Classic 9.90€, 🍔 Double 12.90€, 🍔 Cheese 10.90€, 🍟 Pomfrit 3.50€', package_name: 'Plus', package_price: 19.99, package_type: 'plus', icon: '🍔', status: 'approved', created_at: new Date().toISOString() },
+        { id: 3, name: 'Sushi Master', address: 'Miklošičeva 8, Ljubljana', phone: '031 987 654', email: 'info@sushimaster.si', cuisine: 'sushi', description: 'Svež japonski sushi, pripravljen iz najboljših sestavin.', menu: '🍣 Nigiri 12.90€, 🍣 Maki 10.90€, 🍣 Sashimi 14.90€, 🥣 Miso juha 3.50€', package_name: 'Premium', package_price: 39.99, package_type: 'premium', icon: '🍣', status: 'approved', created_at: new Date().toISOString() },
+        { id: 4, name: 'Wok & Sushi', address: 'Trg republike 3, Ljubljana', phone: '051 234 567', email: 'info@wok.si', cuisine: 'azijska', description: 'Moderni azijski wok in sveže sushi.', menu: '🥢 Juhina juha 6.90€, 🍜 Pad Thai 11.90€, 🍚 Riževi rezanci 10.90€, 🥟 Gyoza 5.90€', package_name: 'Osnovni', package_price: 0, package_type: 'osnovni', icon: '🥢', status: 'approved', created_at: new Date().toISOString() },
+        { id: 5, name: 'Ćevabdžinica Sarajevo', address: 'Kongresni trg 5, Ljubljana', phone: '040 987 654', email: 'info@cevapi.si', cuisine: 'balkanska', description: 'Pravi bosanski ćevapi in tradicionalni žar.', menu: '🥩 Ćevapi 10.90€, 🥩 Pljeskavica 11.90€, 🥩 Raznići 12.90€, 🥤 Sok 2.50€', package_name: 'Osnovni', package_price: 0, package_type: 'osnovni', icon: '🥩', status: 'approved', created_at: new Date().toISOString() },
+        { id: 6, name: 'Pasta e Basta', address: 'Zoisova 7, Ljubljana', phone: '041 567 890', email: 'info@pasta.si', cuisine: 'italijanska', description: 'Prava italijanska pasta in domači njoki.', menu: '🍝 Špageti Bolognese 9.90€, 🍝 Lazanja 12.90€, 🍝 Torte 6.90€, 🥗 Kaprese 5.90€', package_name: 'Plus', package_price: 19.99, package_type: 'plus', icon: '🍝', status: 'approved', created_at: new Date().toISOString() },
+        { id: 7, name: 'Taco Fiesta', address: 'Slovenska cesta 20, Ljubljana', phone: '031 456 789', email: 'info@taco.si', cuisine: 'mehika', description: 'Avtentična mehiška hrana s svežimi sestavinami.', menu: '🌮 Taco 8.90€, 🌯 Burrito 11.90€, 🧀 Quesadilla 10.90€, 🥑 Guacamole 4.90€', package_name: 'Osnovni', package_price: 0, package_type: 'osnovni', icon: '🌮', status: 'approved', created_at: new Date().toISOString() },
+        { id: 8, name: 'Zeleni Kot', address: 'Njegoševa 15, Ljubljana', phone: '041 345 678', email: 'info@vegan.si', cuisine: 'vegan', description: 'Okusna veganska in brezglutenska hrana.', menu: '🌱 Veganski burger 10.90€, 🌱 Tofu skuša 12.90€, 🥤 Smoothie 5.90€, 🥗 Veganska solata 7.90€', package_name: 'Premium', package_price: 39.99, package_type: 'premium', icon: '🌱', status: 'approved', created_at: new Date().toISOString() }
     ];
 }
 
@@ -543,13 +559,16 @@ function renderCustomerView() {
     const sortOrder = { 'spotlight': 0, 'premium': 1, 'plus': 2, 'osnovni': 3 };
     filtered.sort((a, b) => (sortOrder[a.package_type || 'osnovni'] || 3) - (sortOrder[b.package_type || 'osnovni'] || 3));
 
-    // Unsplash images for each cuisine
+    // Modern Images for all cuisines
     const images = {
         'pica': 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&h=400&fit=crop',
         'burger': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&h=400&fit=crop',
         'sushi': 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&h=400&fit=crop',
-        'kavarna': 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=600&h=400&fit=crop',
-        'meso': 'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&h=400&fit=crop'
+        'azijska': 'https://images.unsplash.com/photo-1526318896980-cf78c088247c?w=600&h=400&fit=crop',
+        'balkanska': 'https://images.unsplash.com/photo-1600628421066-f6bda6a7b976?w=600&h=400&fit=crop',
+        'italijanska': 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=600&h=400&fit=crop',
+        'mehika': 'https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?w=600&h=400&fit=crop',
+        'vegan': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&h=400&fit=crop'
     };
 
     let html = '';
@@ -579,7 +598,7 @@ function renderCustomerView() {
 }
 
 // ============================================================
-// RESTAURANT DETAIL
+// RESTAURANT DETAIL & MODERN MENU
 // ============================================================
 function openRestaurant(id) {
     const r = restaurants.find(x => x.id === id);
@@ -594,12 +613,23 @@ function openRestaurant(id) {
     if (r.menu) {
         const items = r.menu.split(',').map(item => item.trim());
         items.forEach(item => {
-            const parts = item.split(' ');
+            // Extract emoji if present
+            const emojiMatch = item.match(/^([\u{1F300}-\u{1FAFF}]\s*)/u);
+            let emoji = '🍽️';
+            let cleanItem = item;
+            if (emojiMatch) {
+                emoji = emojiMatch[0].trim();
+                cleanItem = item.replace(emojiMatch[0], '').trim();
+            }
+            const parts = cleanItem.split(' ');
             const price = parts.pop();
             const name = parts.join(' ');
             menuHtml += `
                 <div class="menu-item">
-                    <div class="left"><div class="mname">${name}</div></div>
+                    <div class="left">
+                        <span class="memoji">${emoji}</span>
+                        <div><div class="mname">${name}</div></div>
+                    </div>
                     <div class="right">
                         <span class="price">${price}</span>
                         <button class="add-btn" onclick="addToCart('${name}', '${price}', ${r.id})">+</button>
@@ -698,7 +728,7 @@ function submitApplication(e) {
     const pkgName = document.getElementById('selectedPackageName').value;
     const pkgPrice = document.getElementById('selectedPackagePrice').value;
     if (!name || !address || !email) { alert('Prosimo izpolnite obvezna polja.'); return; }
-    const icons = { 'pica':'🍕', 'burger':'🍔', 'sushi':'🍣', 'kavarna':'☕', 'meso':'🥩' };
+    const icons = { 'pica':'🍕', 'burger':'🍔', 'sushi':'🍣', 'azijska':'🥢', 'balkanska':'🥩', 'italijanska':'🍝', 'mehika':'🌮', 'vegan':'🌱' };
     const newRest = { id: Date.now(), name, address, phone, email, cuisine, description, menu, package_name: pkgName, package_price: parseFloat(pkgPrice)||0, package_type: pkgName.toLowerCase(), icon: icons[cuisine]||'🍽️', status: 'pending', created_at: new Date().toISOString() };
     restaurants.push(newRest); saveData();
     document.getElementById('registerForm').reset();
