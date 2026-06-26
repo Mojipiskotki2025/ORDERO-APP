@@ -1,0 +1,499 @@
+﻿<!DOCTYPE html>
+<html lang="sl">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>ORDERO – Naroči hrano</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz@14..32&display=swap" rel="stylesheet" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', -apple-system, sans-serif; }
+        body { background: #f2f4f8; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .phone {
+            width: 390px; max-width: 100%; background: #ffffff; border-radius: 44px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.12), 0 10px 30px rgba(0,0,0,0.05);
+            overflow: hidden; position: relative; height: 780px; display: flex; flex-direction: column;
+        }
+        /* Status Bar */
+        .status-bar { padding: 12px 24px 8px; display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: #1a1a2e; background: white; }
+        /* Header */
+        .header { padding: 8px 20px 16px; background: white; border-bottom: 1px solid rgba(0,0,0,0.04); }
+        .logo-row { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 24px; font-weight: 800; color: #00b894; letter-spacing: -0.5px; }
+        .logo span { color: #fdcb6e; }
+        .header-icons { display: flex; gap: 16px; color: #2d3436; font-size: 20px; }
+        .search-bar { margin-top: 12px; background: #f0f2f5; border-radius: 16px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; border: 2px solid transparent; transition: 0.2s; }
+        .search-bar:focus-within { background: white; border-color: #00b894; box-shadow: 0 4px 20px rgba(0,184,148,0.1); }
+        .search-bar input { border: none; background: transparent; width: 100%; font-size: 15px; outline: none; font-weight: 500; }
+
+        /* Scrollable Content */
+        .scroll-content { flex: 1; overflow-y: auto; padding: 0 20px 100px; }
+        .view { display: none; flex-direction: column; height: 100%; background: white; }
+        .view.active { display: flex; }
+
+        /* Category Strip */
+        .category-strip { display: flex; gap: 10px; overflow-x: auto; padding: 16px 0; scrollbar-width: none; background: white; position: sticky; top: 0; z-index: 10; }
+        .category-strip::-webkit-scrollbar { display: none; }
+        .cat-item { display: flex; flex-direction: column; align-items: center; min-width: 64px; opacity: 0.5; cursor: pointer; transition: 0.2s; }
+        .cat-item.active { opacity: 1; }
+        .cat-item .icon-circle { width: 48px; height: 48px; border-radius: 50%; background: #f0f2f5; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.2s; }
+        .cat-item.active .icon-circle { background: #00b894; color: white; box-shadow: 0 4px 12px rgba(0,184,148,0.3); }
+        .cat-item span { font-size: 11px; font-weight: 600; color: #2d3436; margin-top: 2px; }
+
+        /* Restaurant Card (for browsing) */
+        .restaurant-card { background: white; border-radius: 18px; padding: 14px; margin-bottom: 16px; display: flex; align-items: center; cursor: pointer; border: 1px solid rgba(0,0,0,0.04); box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: 0.2s; }
+        .restaurant-card:active { transform: scale(0.98); background: #f8f9fa; }
+        .restaurant-card .img { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; margin-right: 14px; background: #f0f2f5; }
+        .restaurant-card .info { flex: 1; }
+        .restaurant-card .name { font-weight: 700; font-size: 16px; }
+        .restaurant-card .meta { font-size: 12px; color: #636e72; display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; }
+        .badge { font-size: 9px; font-weight: 700; padding: 2px 10px; border-radius: 20px; display: inline-block; }
+        .badge-sponsor { background: #fdcb6e; color: #2d3436; }
+        .badge-boost { background: #00b894; color: white; }
+
+        /* Menu Item (inside restaurant detail) */
+        .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f0f0f0; }
+        .menu-item .left { flex: 1; }
+        .menu-item .left .mname { font-weight: 600; font-size: 15px; }
+        .menu-item .left .mdesc { font-size: 12px; color: #636e72; }
+        .menu-item .right { display: flex; align-items: center; gap: 12px; }
+        .menu-item .right .price { font-weight: 700; color: #00b894; }
+        .menu-item .right .add-btn { background: #00b894; color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
+        .menu-item .right .add-btn:active { transform: scale(0.9); }
+
+        /* Cart Bubble */
+        .cart-bubble { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%); background: #1a1a2e; color: white; padding: 12px 24px; border-radius: 30px; box-shadow: 0 8px 24px rgba(0,0,0,0.2); display: none; align-items: center; gap: 16px; z-index: 40; font-weight: 600; cursor: pointer; }
+        .cart-bubble.show { display: flex; }
+        .cart-bubble .count { background: #fdcb6e; color: #1a1a2e; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+        .cart-bubble .total { color: #fdcb6e; }
+
+        /* Bottom Navigation */
+        .bottom-nav { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: space-around; padding: 8px 0 18px; z-index: 10; }
+        .bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: #b2bec3; cursor: pointer; gap: 2px; }
+        .bottom-nav .nav-item i { font-size: 20px; }
+        .bottom-nav .nav-item.active { color: #00b894; }
+
+        /* Bottom Sheet (Restaurant Detail) */
+        .bottom-sheet { position: absolute; bottom: -100%; left: 0; right: 0; background: white; border-radius: 30px 30px 0 0; padding: 24px 20px 40px; z-index: 50; transition: bottom 0.4s cubic-bezier(0.22, 1, 0.36, 1); box-shadow: 0 -10px 40px rgba(0,0,0,0.1); max-height: 85%; overflow-y: auto; }
+        .bottom-sheet.open { bottom: 0; }
+        .sheet-handle { width: 40px; height: 4px; background: #ddd; border-radius: 4px; margin: 0 auto 16px; }
+        .sheet-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .sheet-header h2 { font-size: 22px; font-weight: 700; }
+        .sheet-close { font-size: 24px; cursor: pointer; color: #636e72; }
+        .sheet-rating { font-size: 14px; color: #636e72; margin-bottom: 16px; }
+        .sheet-menu-section { margin-top: 16px; }
+
+        /* Checkout Overlay */
+        .checkout-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: white; z-index: 60; padding: 24px 20px; overflow-y: auto; display: none; flex-direction: column; }
+        .checkout-overlay.open { display: flex; }
+        .checkout-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .checkout-header h2 { font-size: 20px; }
+        .checkout-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #f0f0f0; }
+        .checkout-total { display: flex; justify-content: space-between; padding: 16px 0; font-weight: 700; font-size: 18px; border-top: 2px solid #ddd; margin-top: 8px; }
+        .checkout-btn { background: #00b894; color: white; border: none; padding: 16px; border-radius: 16px; font-weight: 700; font-size: 18px; width: 100%; cursor: pointer; margin-top: 20px; }
+
+        /* Admin */
+        .admin-panel { background: #f8f9fa; border-radius: 16px; padding: 16px; margin-bottom: 16px; border-left: 4px solid #fdcb6e; }
+        .app-card { background: white; padding: 12px; border-radius: 12px; margin-bottom: 10px; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+        .btn-approve { background: #00b894; color: white; border: none; padding: 6px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+        .btn-reject { background: #ff6b6b; color: white; border: none; padding: 6px 16px; border-radius: 20px; font-weight: 600; cursor: pointer; margin-left: 5px; }
+        .btn-primary { background: #00b894; color: white; border: none; padding: 14px; border-radius: 12px; font-weight: 700; width: 100%; cursor: pointer; }
+        .btn-secondary { background: #f0f2f5; border: none; padding: 14px; border-radius: 12px; font-weight: 600; width: 100%; cursor: pointer; margin-top: 8px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { font-weight: 600; font-size: 14px; display: block; margin-bottom: 4px; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; font-size: 14px; }
+        .package-option { display: flex; justify-content: space-between; padding: 12px; background: white; border-radius: 12px; margin-bottom: 8px; border: 2px solid #f0f0f0; cursor: pointer; }
+        .package-option.selected { border-color: #00b894; background: #f0fdfa; }
+        .flash { background: #d4edda; color: #155724; padding: 12px; border-radius: 12px; margin-bottom: 16px; display: none; }
+        .flash.show { display: block; }
+        .scroll-content-adm { padding: 20px; overflow-y: auto; flex: 1; }
+        .hero-banner { background: linear-gradient(135deg, #00b894 0%, #00cec9 100%); border-radius: 20px; padding: 20px; margin-bottom: 20px; color: white; }
+        .hero-banner h2 { font-size: 18px; font-weight: 700; }
+        .hero-banner p { font-size: 13px; opacity: 0.9; margin-top: 4px; }
+        
+        /* Empty state */
+        .empty-state { text-align: center; padding: 60px 20px; color: #b2bec3; }
+        .empty-state i { font-size: 48px; display: block; margin-bottom: 16px; }
+        .empty-state h3 { font-size: 18px; color: #2d3436; }
+    </style>
+</head>
+<body>
+<div class="phone" id="app">
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <div class="logo-row">
+            <div class="logo">ORDERO<span>.</span></div>
+            <div class="header-icons">
+                <i class="far fa-heart" onclick="alert('Priljubljene - kmalu')"></i>
+                <i class="far fa-user" onclick="alert('Profil - kmalu')"></i>
+            </div>
+        </div>
+        <div class="search-bar"><i class="fas fa-search" style="color:#b2bec3;"></i><input type="text" id="globalSearch" placeholder="Išči restavracije..." oninput="renderCustomerView()" /></div>
+    </div>
+
+    <!-- ===== VIEW 1: CUSTOMER ===== -->
+    <div id="customerView" class="view active">
+        <div class="scroll-content">
+            <!-- Hero -->
+            <div class="hero-banner">
+                <h2>🍕 Lačen?</h2>
+                <p>Odkrij najboljše restavracije v Ljubljani.</p>
+            </div>
+
+            <!-- Categories -->
+            <div class="category-strip" id="categoryFilter">
+                <div class="cat-item active" data-cat="all"><div class="icon-circle"><i class="fas fa-utensils"></i></div><span>Vse</span></div>
+                <div class="cat-item" data-cat="pica"><div class="icon-circle"><i class="fas fa-pizza-slice"></i></div><span>Pica</span></div>
+                <div class="cat-item" data-cat="burger"><div class="icon-circle"><i class="fas fa-hamburger"></i></div><span>Burger</span></div>
+                <div class="cat-item" data-cat="sushi"><div class="icon-circle"><i class="fas fa-fish"></i></div><span>Sushi</span></div>
+                <div class="cat-item" data-cat="kavarna"><div class="icon-circle"><i class="fas fa-mug-hot"></i></div><span>Kavarna</span></div>
+            </div>
+
+            <!-- Restaurant List -->
+            <div id="restaurantList"></div>
+        </div>
+    </div>
+
+    <!-- ===== VIEW 2: REGISTER (Restaurant Onboarding) ===== -->
+    <div id="registerView" class="view">
+        <div class="scroll-content" style="padding:20px;">
+            <h2 style="margin-bottom:16px;">📝 Registracija restavracije</h2>
+            <div id="regFlash" class="flash">✅ Prijava uspešna! Čakamo na odobritev.</div>
+            <form id="registerForm" onsubmit="submitApplication(event)">
+                <div class="form-group"><label>Ime restavracije *</label><input id="rName" required placeholder="Npr. Pizza Napoli" /></div>
+                <div class="form-group"><label>Naslov *</label><input id="rAddress" required placeholder="Trubarjeva 12, Ljubljana" /></div>
+                <div class="form-group"><label>Telefon</label><input id="rPhone" placeholder="041 234 567" /></div>
+                <div class="form-group"><label>Email (za prijavo) *</label><input id="rEmail" type="email" required placeholder="info@pizzanapoli.si" /></div>
+                <div class="form-group"><label>Kategorija</label><select id="rCuisine"><option value="pica">🍕 Pica</option><option value="burger">🍔 Burger</option><option value="sushi">🍣 Sushi</option><option value="kavarna">☕ Kavarna</option><option value="meso">🥩 Meso</option></select></div>
+                <div class="form-group"><label>Kratek opis</label><textarea id="rDesc" rows="2" placeholder="Avtentična italijanska kuhinja..."></textarea></div>
+                <div class="form-group"><label>Meni (jedi z cenami)</label><textarea id="rMenu" rows="3" placeholder="Margherita 8.90€, Capricciosa 10.90€, Coca-Cola 2.50€"></textarea></div>
+                <div class="form-group"><label>Izberite paket</label>
+                    <div class="package-option" data-price="0" onclick="selectPackage(this, 'Osnovni', 0)"><span><b>Osnovni (Brezplačno)</b><br><span style="font-size:12px;color:#636e72;">Osnovni profil</span></span><span>€0</span></div>
+                    <div class="package-option" data-price="19.99" onclick="selectPackage(this, 'Plus', 19.99)"><span><b>Plus</b><br><span style="font-size:12px;color:#636e72;">Oznaka PREMIUM</span></span><span>€19.99/m</span></div>
+                    <div class="package-option" data-price="39.99" onclick="selectPackage(this, 'Pro', 39.99)"><span><b>Pro</b><br><span style="font-size:12px;color:#636e72;">Izpostavitev + analitika</span></span><span>€39.99/m</span></div>
+                </div>
+                <input type="hidden" id="selectedPackageName" value="Osnovni" />
+                <input type="hidden" id="selectedPackagePrice" value="0" />
+                <button type="submit" class="btn-primary"><i class="fas fa-paper-plane"></i> Pošlji v pregled</button>
+            </form>
+            <button class="btn-secondary" onclick="switchView('customerView')">Nazaj na iskanje</button>
+        </div>
+    </div>
+
+    <!-- ===== VIEW 3: ADMIN ===== -->
+    <div id="adminView" class="view">
+        <div class="scroll-content-adm">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <h2>🔐 Admin nadzor</h2>
+                <span style="font-size:12px;color:#636e72;cursor:pointer;" onclick="switchView('customerView')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="admin-panel"><h4>Čakajo na odobritev</h4><div class="number" id="pendingCount">0</div></div>
+            <div id="adminList"></div>
+            <button class="btn-secondary" onclick="switchView('customerView')" style="margin-top:16px;">Nazaj na aplikacijo</button>
+        </div>
+    </div>
+
+    <!-- ===== CART BUBBLE ===== -->
+    <div id="cartBubble" class="cart-bubble" onclick="openCheckout()">
+        <span>🛒 Košarica</span>
+        <span class="count" id="cartCount">0</span>
+        <span class="total" id="cartTotal">€0.00</span>
+    </div>
+
+    <!-- ===== BOTTOM SHEET (Restaurant Detail + Ordering) ===== -->
+    <div id="bottomSheet" class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <h2 id="sheetName">Restavracija</h2>
+            <span class="sheet-close" onclick="closeSheet()"><i class="fas fa-times"></i></span>
+        </div>
+        <div class="sheet-rating" id="sheetRating">⭐ 4.5 (12 ocen)</div>
+        <p style="color:#636e72; margin-bottom: 8px;" id="sheetDesc">Opis...</p>
+        <p style="font-weight:600; margin-bottom: 16px;" id="sheetPhone">📞 041 234 567</p>
+        <div class="sheet-menu-section">
+            <h4 style="font-size:16px; margin-bottom: 8px;">🍽️ Meni</h4>
+            <div id="sheetMenu"></div>
+        </div>
+    </div>
+
+    <!-- ===== CHECKOUT OVERLAY ===== -->
+    <div id="checkoutOverlay" class="checkout-overlay">
+        <div class="checkout-header">
+            <h2>🛒 Košarica</h2>
+            <span style="font-size:24px; cursor:pointer;" onclick="closeCheckout()"><i class="fas fa-times"></i></span>
+        </div>
+        <div id="checkoutItems"></div>
+        <div class="checkout-total"><span>Skupaj</span><span id="checkoutTotal">€0.00</span></div>
+        <button class="checkout-btn" onclick="placeOrder()"><i class="fas fa-shopping-bag"></i> Naroči zdaj</button>
+        <button class="btn-secondary" onclick="closeCheckout()" style="margin-top:8px;">Nazaj</button>
+    </div>
+
+    <!-- ===== BOTTOM NAV ===== -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('customerView')"><i class="fas fa-home"></i><span>Domov</span></div>
+        <div class="nav-item" onclick="switchView('registerView')"><i class="fas fa-store"></i><span>Registracija</span></div>
+        <div class="nav-item" onclick="switchView('adminView')"><i class="fas fa-user-cog"></i><span>Admin</span></div>
+        <div class="nav-item" onclick="alert('Priljubljene - kmalu')"><i class="fas fa-heart"></i><span>Priljubljene</span></div>
+    </div>
+</div>
+
+<!-- ===== SUPABASE SDK ===== -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============================================================
+// 🔑 KEYS
+// ============================================================
+const supabaseUrl = 'https://vajkekhellzioxkbmdqp.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhamtla2hlbGx6aW94a2JtZHFwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODg5MzEsImV4cCI6MjA5ODA2NDkzMX0.7HZo1GX1ddWyKlBEY0xCRmDxjmewKPtrOZApnKBBv6s';
+const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+// ============================================================
+// STATE
+// ============================================================
+let restaurants = [];
+let currentFilter = 'all';
+let cart = [];
+let currentRestaurantId = null;
+
+// ============================================================
+// CORE
+// ============================================================
+async function loadDataFromSupabase() {
+    try {
+        document.getElementById('restaurantList').innerHTML = '<div style="text-align:center;padding:40px;color:#b2bec3;">Nalaganje...</div>';
+        const { data, error } = await supabaseClient.from('restaurants').select('*');
+        if (error) { console.error(error); alert('Napaka: ' + error.message); return; }
+        if (data && data.length > 0) { restaurants = data; } 
+        else { restaurants = getDefaultRestaurants(); await saveDataToSupabase(restaurants); }
+        renderAll();
+    } catch (err) { console.error(err); alert('Napaka: ' + err.message); }
+}
+async function saveDataToSupabase(data) {
+    try {
+        await supabaseClient.from('restaurants').delete().neq('id', 0);
+        if (data.length > 0) { await supabaseClient.from('restaurants').insert(data); }
+    } catch (err) { console.error(err); }
+}
+function saveData() { saveDataToSupabase(restaurants); }
+function renderAll() { renderCustomerView(); renderAdminView(); updatePendingCount(); updateCartBubble(); }
+
+function getDefaultRestaurants() {
+    return [
+        { id: 1, name: 'Pizza Napoli', address: 'Trubarjeva 12', phone: '041 234 567', email: 'info@pizzanapoli.si', cuisine: 'pica', description: 'Avtentična italijanska pica, pečena v peči na drva.', menu: 'Margherita 8.90€, Capricciosa 10.90€, Prosciutto 11.90€, Coca-Cola 2.50€', package_name: 'Spotlight', package_price: 149.99, package_type: 'spotlight', icon: '🍕', status: 'approved', created_at: new Date().toISOString() },
+        { id: 2, name: 'Burger House', address: 'Slovenska 5', phone: '040 123 456', email: 'info@burgerhouse.si', cuisine: 'burger', description: 'Sočni burgerji iz svežega govejega mesa.', menu: 'Classic 9.90€, Double 12.90€, Cheese 10.90€, Pomfrit 3.50€', package_name: 'Plus', package_price: 19.99, package_type: 'plus', icon: '🍔', status: 'approved', created_at: new Date().toISOString() },
+        { id: 3, name: 'Sushi Master', address: 'Miklošičeva 8', phone: '031 987 654', email: 'info@sushimaster.si', cuisine: 'sushi', description: 'Svež japonski sushi, pripravljen iz najboljših sestavin.', menu: 'Nigiri 12.90€, Maki 10.90€, Sashimi 14.90€, Miso juha 3.50€', package_name: 'Premium', package_price: 39.99, package_type: 'premium', icon: '🍣', status: 'approved', created_at: new Date().toISOString() }
+    ];
+}
+
+// ============================================================
+// CUSTOMER VIEW
+// ============================================================
+function renderCustomerView() {
+    const list = document.getElementById('restaurantList');
+    const search = document.getElementById('globalSearch').value.toLowerCase();
+    let filtered = restaurants.filter(r => r.status === 'approved');
+    filtered = filtered.filter(r => { if (currentFilter === 'all') return true; return r.cuisine === currentFilter; });
+    filtered = filtered.filter(r => r.name.toLowerCase().includes(search) || (r.description || '').toLowerCase().includes(search));
+
+    if (filtered.length === 0) {
+        list.innerHTML = `<div class="empty-state"><i class="fas fa-utensils"></i><h3>Ni najdenih restavracij</h3><p style="color:#b2bec3;">Poskusite spremeniti iskalni niz ali kategorijo.</p></div>`;
+        return;
+    }
+
+    const sortOrder = { 'spotlight': 0, 'premium': 1, 'plus': 2, 'osnovni': 3 };
+    filtered.sort((a, b) => (sortOrder[a.package_type || 'osnovni'] || 3) - (sortOrder[b.package_type || 'osnovni'] || 3));
+
+    let html = '';
+    filtered.forEach(r => {
+        let badge = '', badgeClass = '';
+        if (r.package_type === 'spotlight') { badge = '⭐ SPOTLIGHT'; badgeClass = 'badge-sponsor'; }
+        else if (r.package_type === 'premium') { badge = '🌟 PREMIUM'; badgeClass = 'badge-sponsor'; }
+        else if (r.package_type === 'plus') { badge = '🚀 PLUS'; badgeClass = 'badge-boost'; }
+        html += `
+            <div class="restaurant-card" onclick="openRestaurant(${r.id})">
+                <div class="img">${r.icon || '🍽️'}</div>
+                <div class="info">
+                    <div class="name">${r.name}</div>
+                    <div class="meta"><span>⭐ 4.5 (12)</span> ${badge ? `<span class="badge ${badgeClass}">${badge}</span>` : ''}</div>
+                </div>
+            </div>
+        `;
+    });
+    list.innerHTML = html;
+}
+
+// ============================================================
+// RESTAURANT DETAIL & ORDERING
+// ============================================================
+function openRestaurant(id) {
+    const r = restaurants.find(x => x.id === id);
+    if (!r) return;
+    currentRestaurantId = id;
+    document.getElementById('sheetName').textContent = r.name;
+    document.getElementById('sheetDesc').textContent = r.description || 'Odlična restavracija.';
+    document.getElementById('sheetRating').textContent = '⭐ 4.5 (12 ocen)';
+    document.getElementById('sheetPhone').textContent = '📞 ' + (r.phone || 'Ni telefona.');
+    
+    let menuHtml = '';
+    if (r.menu) {
+        const items = r.menu.split(',').map(item => item.trim());
+        items.forEach(item => {
+            const parts = item.split(' ');
+            const price = parts.pop();
+            const name = parts.join(' ');
+            menuHtml += `
+                <div class="menu-item">
+                    <div class="left"><div class="mname">${name}</div></div>
+                    <div class="right">
+                        <span class="price">${price}</span>
+                        <button class="add-btn" onclick="addToCart('${name}', '${price}', ${r.id})">+</button>
+                    </div>
+                </div>
+            `;
+        });
+    } else {
+        menuHtml = '<p style="color:#b2bec3; text-align:center; padding:20px 0;">Meni ni na voljo.</p>';
+    }
+    document.getElementById('sheetMenu').innerHTML = menuHtml;
+    document.getElementById('bottomSheet').classList.add('open');
+}
+
+function closeSheet() { document.getElementById('bottomSheet').classList.remove('open'); }
+
+// ============================================================
+// CART FUNCTIONS
+// ============================================================
+function addToCart(itemName, priceStr, restaurantId) {
+    const price = parseFloat(priceStr.replace('€', '').replace(',', '.'));
+    const existing = cart.find(c => c.name === itemName && c.restaurantId === restaurantId);
+    if (existing) {
+        existing.qty += 1;
+    } else {
+        cart.push({ name: itemName, price: price, qty: 1, restaurantId: restaurantId });
+    }
+    updateCartBubble();
+}
+
+function updateCartBubble() {
+    const count = cart.reduce((sum, c) => sum + c.qty, 0);
+    const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
+    document.getElementById('cartCount').textContent = count;
+    document.getElementById('cartTotal').textContent = '€' + total.toFixed(2);
+    const bubble = document.getElementById('cartBubble');
+    if (count > 0) { bubble.classList.add('show'); } else { bubble.classList.remove('show'); }
+}
+
+function openCheckout() {
+    if (cart.length === 0) { alert('Košarica je prazna.'); return; }
+    const itemsDiv = document.getElementById('checkoutItems');
+    let html = '';
+    cart.forEach(c => {
+        html += `<div class="checkout-item"><span>${c.name} x${c.qty}</span><span>€${(c.price * c.qty).toFixed(2)}</span></div>`;
+    });
+    itemsDiv.innerHTML = html;
+    const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
+    document.getElementById('checkoutTotal').textContent = '€' + total.toFixed(2);
+    document.getElementById('checkoutOverlay').classList.add('open');
+}
+
+function closeCheckout() { document.getElementById('checkoutOverlay').classList.remove('open'); }
+
+function placeOrder() {
+    if (cart.length === 0) return;
+    const total = cart.reduce((sum, c) => sum + (c.price * c.qty), 0);
+    alert('✅ Naročilo uspešno! Skupaj: €' + total.toFixed(2) + '\nHvala za vaše naročilo!');
+    cart = [];
+    updateCartBubble();
+    closeCheckout();
+    closeSheet();
+}
+
+// ============================================================
+// ADMIN
+// ============================================================
+function renderAdminView() {
+    const list = document.getElementById('adminList');
+    const pending = restaurants.filter(r => r.status === 'pending');
+    if (pending.length === 0) { list.innerHTML = '<div style="padding:20px;color:#b2bec3;">Ni čakajočih prijav.</div>'; return; }
+    let html = '';
+    pending.forEach(r => {
+        html += `<div class="app-card"><div><div class="name">${r.icon} ${r.name}</div><div class="details" style="font-size:12px;color:#636e72;">${r.address}</div></div><div><button class="btn-approve" onclick="approveRest(${r.id})">Odobri</button><button class="btn-reject" onclick="rejectRest(${r.id})"><i class="fas fa-times"></i></button></div></div>`;
+    });
+    list.innerHTML = html;
+}
+function updatePendingCount() { document.getElementById('pendingCount').textContent = restaurants.filter(r => r.status === 'pending').length; }
+function approveRest(id) { const r = restaurants.find(x => x.id === id); if(r){ r.status='approved'; saveData(); alert(`✅ "${r.name}" objavljen!`); renderAll(); } }
+function rejectRest(id) { if(confirm('Zavrnite?')){ restaurants = restaurants.filter(x => x.id !== id); saveData(); renderAll(); } }
+
+// ============================================================
+// REGISTER
+// ============================================================
+function selectPackage(el, name, price) {
+    document.querySelectorAll('.package-option').forEach(p => p.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('selectedPackageName').value = name;
+    document.getElementById('selectedPackagePrice').value = price;
+}
+function submitApplication(e) {
+    e.preventDefault();
+    const name = document.getElementById('rName').value.trim();
+    const address = document.getElementById('rAddress').value.trim();
+    const phone = document.getElementById('rPhone').value.trim();
+    const email = document.getElementById('rEmail').value.trim();
+    const cuisine = document.getElementById('rCuisine').value;
+    const description = document.getElementById('rDesc').value.trim();
+    const menu = document.getElementById('rMenu').value.trim();
+    const pkgName = document.getElementById('selectedPackageName').value;
+    const pkgPrice = document.getElementById('selectedPackagePrice').value;
+    if (!name || !address || !email) { alert('Prosimo izpolnite obvezna polja.'); return; }
+    const icons = { 'pica':'🍕', 'burger':'🍔', 'sushi':'🍣', 'kavarna':'☕', 'meso':'🥩' };
+    const newRest = { id: Date.now(), name, address, phone, email, cuisine, description, menu, package_name: pkgName, package_price: parseFloat(pkgPrice)||0, package_type: pkgName.toLowerCase(), icon: icons[cuisine]||'🍽️', status: 'pending', created_at: new Date().toISOString() };
+    restaurants.push(newRest); saveData();
+    document.getElementById('registerForm').reset();
+    document.querySelectorAll('.package-option').forEach(p => p.classList.remove('selected'));
+    document.getElementById('selectedPackageName').value = 'Osnovni';
+    document.getElementById('selectedPackagePrice').value = '0';
+    const flash = document.getElementById('regFlash');
+    flash.classList.add('show');
+    setTimeout(() => flash.classList.remove('show'), 4000);
+    switchView('customerView');
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function switchView(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    if (viewId === 'adminView') renderAdminView();
+    if (viewId === 'customerView') renderCustomerView();
+    document.querySelectorAll('.bottom-nav .nav-item').forEach((el, idx) => {
+        el.classList.remove('active');
+        if (viewId === 'customerView' && idx === 0) el.classList.add('active');
+        if (viewId === 'registerView' && idx === 1) el.classList.add('active');
+        if (viewId === 'adminView' && idx === 2) el.classList.add('active');
+    });
+    closeSheet();
+    closeCheckout();
+}
+
+// ============================================================
+// CATEGORY CLICKS
+// ============================================================
+document.querySelectorAll('.cat-item').forEach(el => {
+    el.addEventListener('click', function() {
+        document.querySelectorAll('.cat-item').forEach(c => c.classList.remove('active'));
+        this.classList.add('active');
+        currentFilter = this.dataset.cat;
+        renderCustomerView();
+    });
+});
+
+// ============================================================
+// INIT
+// ============================================================
+window.onload = function() { loadDataFromSupabase(); };
+</script>
+</body>
+</html>
