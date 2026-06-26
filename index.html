@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="sl">
 <head>
     <meta charset="UTF-8" />
@@ -458,7 +458,6 @@ function openRestaurant(id) {
                 const emoji = currentCategory.toLowerCase().includes('pijača') ? '🥤' : '🍽️';
                 menuHtml += `<div class="menu-category-title">${emoji} ${currentCategory}</div>`;
             } else {
-                // Extract emoji from line if present
                 const emojiMatch = line.match(/^([\u{1F300}-\u{1FAFF}]\s*)/u);
                 let emoji = '🍽️';
                 let cleanLine = line;
@@ -471,7 +470,6 @@ function openRestaurant(id) {
                 const name = parts.join(' ');
                 const existing = cart.find(c => c.name === name && c.restaurantId === r.id);
                 const qty = existing ? existing.qty : 0;
-                // Check if item has discount (price with ~~strikethrough~~)
                 let displayPrice = price;
                 let isDiscounted = false;
                 if (price.includes('~~')) {
@@ -499,7 +497,6 @@ function closeSheet() { document.getElementById('bottomSheet').classList.remove(
 // ============================================================
 function updateCart(itemName, priceStr, restaurantId, delta) {
     if (!currentUser) { alert('Za naročanje se morate najprej prijaviti.'); toggleAuth(); return; }
-    // Clean price: remove emojis and strikethrough
     let cleanPrice = priceStr.replace(/[^\d.,]/g, '').replace(',', '.');
     const price = parseFloat(cleanPrice);
     if (isNaN(price)) { console.error('Invalid price:', priceStr); return; }
@@ -614,7 +611,7 @@ function submitApplication(e) {
 }
 
 // ============================================================
-// INIT
+// INIT – FIXED AUTO-LOAD
 // ============================================================
 function setupCategoryFilters() {
     document.querySelectorAll('#categoryFilter .cat-item, #categoryFilterFood .cat-item').forEach(el => {
@@ -629,6 +626,7 @@ function setupCategoryFilters() {
 }
 document.getElementById('globalSearch').addEventListener('input', function() { renderAllViews(); });
 
+// ===== THIS IS THE FIX – THE APP NOW LOADS ON PAGE LOAD =====
 window.onload = function() {
     loadSession();
     setupCategoryFilters();
